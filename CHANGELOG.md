@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.1] - 2026-09-05
+### Added
+- First-task brief in `docs/first-task.md`: one `index.html` page for the must-have quiz only, with locked question, time, and language choices.
+
 ## [0.1.0] - 2026-09-05
 ### Added
 - Empty saved copy for the quiz (git repo on GitHub)

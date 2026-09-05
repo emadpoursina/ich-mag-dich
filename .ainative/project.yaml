@@ -1,0 +1,11 @@
+name: ich-mag-dich
+description: One-page German hidden-message quiz
+repository: github.com/emadpoursina/ich-mag-dich
+default_branch: master
+
+workflow:
+  default: piv
+
+validation:
+  commands:
+    - test -f index.html

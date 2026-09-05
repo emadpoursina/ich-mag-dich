@@ -1,0 +1,1 @@
+Build only a single `index.html` file with CSS and JavaScript inside it. Do not add libraries, a build step, extra pages, or network calls. Follow `docs/prd.md`. Leave files that are not the quiz page unchanged unless a later task says otherwise.

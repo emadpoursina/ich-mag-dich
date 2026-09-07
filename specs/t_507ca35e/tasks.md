@@ -1,0 +1,1 @@
+Updated the landing subtitle in index.html to mention that the quiz has 3 Fragen, making it clear to visitors that this is a short three-question quiz. No other files were changed, and the quiz questions, rewards, and yes/no paths remain untouched.

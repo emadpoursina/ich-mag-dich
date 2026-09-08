@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deutsch-Quiz: Was ist das?</title>
+<style>
+  :root {
+    --cream: #fff7ef;
+    --rose: #ffd6e0;
+    --rose-deep: #ff8fab;
+    --card: #ffffff;
+    --ink: #4a3f4d;
+    --muted: #9b8fa3;
+    --pill-a: #ffd6e0;
+    --pill-b: #cfe8ff;
+    --pill-c: #fff3c4;
+    --shadow: 0 8px 24px rgba(74, 63, 77, 0.10);
+    --gray: #ececef;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(160deg, var(--cream), #ffe9ee);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 16px;
+  }
+  .screen {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 28px;
+    padding: 28px 22px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    display: none;
+    animation: pop 0.4s ease;
+  }
+  .screen.active { display: block; }
+  @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+  .icon { font-size: 64px; line-height: 1.2; margin-bottom: 6px; }
+  h1 { font-size: 26px; margin: 10px 0 6px; line-height: 1.2; }
+  h2 { font-size: 21px; margin: 10px 0 6px; line-height: 1.25; }
+  .sub { color: var(--muted); font-size: 16px; margin: 0 0 20px; line-height: 1.4; }
+
+  .card { background: var(--card); border-radius: 20px; padding: 20px 16px; margin-bottom: 18px; box-shadow: var(--shadow); }
+  .prompt { font-size: 72px; line-height: 1.1; margin-bottom: 6px; }
+  .q-label { color: var(--muted); font-size: 14px; letter-spacing: 0.4px; margin-bottom: 14px; }
+
+  .opts { display: grid; gap: 12px; }
+  button {
+    font-family: inherit;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    border: none;
+    border-radius: 16px;
+    padding: 16px 18px;
+    min-height: 56px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.06);
+    transition: transform 0.08s ease, filter 0.15s ease;
+  }
+  button:active { transform: translateY(2px); }
+  button.opt-a { background: var(--pill-a); }
+  button.opt-b { background: var(--pill-b); }
+  button.opt-c { background: var(--pill-c); }
+  button.opt { display: block; width: 100%; text-align: center; }
+  button.opt.wrong { animation: shake 0.4s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-7px);} 75%{transform:translateX(7px);} }
+
+  .feedback { margin-top: 14px; font-size: 17px; font-weight: 700; min-height: 24px; }
+  .feedback.good { color: #2e9e5b; }
+  .feedback.try { color: #e07a3f; }
+
+  .rewards { display: flex; justify-content: center; gap: 10px; min-height: 44px; margin-top: 4px; flex-wrap: wrap; }
+  .reward-word {
+    font-size: 22px;
+    font-weight: 800;
+    background: var(--rose);
+    color: #fff;
+    border-radius: 14px;
+    padding: 8px 16px;
+    min-width: 70px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .reward-word.earned { opacity: 1; transform: scale(1); }
+  .reward-empty { color: var(--muted); font-size: 14px; align-self: center; }
+
+  .big-btn { display: block; width: 100%; background: var(--rose-deep); color: #fff; font-size: 24px; padding: 18px; border-radius: 18px; }
+  .big-btn.green { background: #62c77f; }
+  .no-btn { background: var(--gray); color: var(--muted); font-size: 16px; min-height: 50px; margin-top: 12px; }
+
+  /* confetti */
+  .confetti-wrap { position: relative; height: 0; }
+  .confetti { position: absolute; top: 8px; width: 10px; height: 10px; opacity: 0; border-radius: 2px; animation: fall 1.6s ease-in forwards; }
+  @keyframes fall {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(140px) rotate(340deg); }
+  }
+
+  .magic-line { font-size: 40px; font-weight: 900; margin: 6px 0 2px; letter-spacing: 1px; }
+  .big-heart { font-size: 44px; animation: beat 1s ease-in-out infinite; }
+  @keyframes beat { 0%,100%{transform:scale(1);} 50%{transform:scale(1.18);} }
+
+  .picker { display: grid; gap: 12px; margin: 16px 0; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chip { background: var(--card); border: 3px solid var(--rose); border-radius: 16px; padding: 16px; font-size: 20px; font-weight: 800; box-shadow: none; }
+  .chip.selected { background: var(--rose-deep); color: #fff; border-color: var(--rose-deep); }
+
+  .confirm { margin-top: 18px; font-size: 20px; font-weight: 800; color: #2e9e5b; }
+
+  .dance-emoji { font-size: 84px; display: inline-block; animation: dance 0.7s ease-in-out infinite; }
+  @keyframes dance {
+    0%,100% { transform: translateY(0) rotate(-8deg); }
+    50% { transform: translateY(-14px) rotate(8deg); }
+  }
+  .farewell { margin-top: 18px; color: var(--muted); font-size: 17px; font-weight: 600; opacity: 0; animation: fadeIn 0.8s ease 1.6s forwards; }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .sad { color: #6d6a70; }
+</style>
+</head>
+<body>
+
+<!-- ===== LANDING (F1) ===== -->
+<section class="screen active" id="s-landing">
+  <div class="icon">☕</div>
+  <h1>Deutsch-Quiz: Was ist das?</h1>
+  <p class="sub">Ein kurzes Quiz mit 3 Fragen: Wähle das richtige Wort für jedes Bild!</p>
+  <button class="big-btn" id="btn-start">Los geht's!</button>
+</section>
+
+<!-- ===== QUIZ (F2/F3) ===== -->
+<section class="screen" id="s-quiz">
+  <div class="card">
+    <div class="prompt" id="q-prompt"></div>
+    <div class="q-label">Was ist das?</div>
+    <div class="opts">
+      <button class="opt opt-a" data-v="0"></button>
+      <button class="opt opt-b" data-v="1"></button>
+      <button class="opt opt-c" data-v="2"></button>
+    </div>
+    <div class="feedback" id="q-feedback"></div>
+  </div>
+  <div class="q-label">Deine Wörter:</div>
+  <div class="rewards" id="rewards">
+    <span class="reward-empty">Noch keine…</span>
+  </div>
+</section>
+
+<!-- ===== REVEAL (F4) ===== -->
+<section class="screen" id="s-reveal">
+  <div class="confetti-wrap" id="confetti-wrap"></div>
+  <div class="icon" id="reveal-icon">🎉</div>
+  <h1 id="reveal-title">Gut gemacht! 🎉</h1>
+  <p class="sub" id="reveal-sub">Deine drei Wörter…</p>
+  <div class="rewards" id="reveal-words"></div>
+  <div id="magic-block" style="display:none;">
+    <div class="magic-line">Ich mag dich</div>
+    <div class="big-heart">❤️</div>
+  </div>
+</section>
+
+<!-- ===== ASK (F5) ===== -->
+<section class="screen" id="s-ask">
+  <div class="big-heart" style="margin-bottom:8px;">❤️</div>
+  <h2>Und jetzt die letzte Frage…</h2>
+  <h1>Willst du mit mir ausgehen?</h1>
+  <div class="picker">
+    <button class="big-btn green" id="btn-yes">JA!</button>
+    <button class="no-btn" id="btn-no">NEIN...</button>
+  </div>
+</section>
+
+<!-- ===== YES (F6) ===== -->
+<section class="screen" id="s-yes">
+  <div class="icon">🗓️</div>
+  <h2>Wann? Freitag oder Samstag?</h2>
+  <div class="row">
+    <button class="chip" data-day="Freitag">Freitag</button>
+    <button class="chip" data-day="Samstag">Samstag</button>
+  </div>
+  <div class="row">
+    <button class="chip" data-time="18">18 Uhr</button>
+    <button class="chip" data-time="19">19 Uhr</button>
+    <button class="chip" data-time="20">20 Uhr</button>
+  </div>
+  <div class="confirm" id="yes-confirm"></div>
+</section>
+
+<!-- ===== NO (F7) ===== -->
+<section class="screen" id="s-no">
+  <h1 class="sad">Schade... 😢</h1>
+  <p class="sub">Aber ich tanze für dich!</p>
+  <div class="dance-emoji">🕺</div>
+  <div class="farewell">Tschüss! Bis morgen in der Klasse!</div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- state ----
+  var screens = {
+    landing: document.getElementById("s-landing"),
+    quiz: document.getElementById("s-quiz"),
+    reveal: document.getElementById("s-reveal"),
+    ask: document.getElementById("s-ask"),
+    yes: document.getElementById("s-yes"),
+    no: document.getElementById("s-no")
+  };
+
+  // ---- quiz data (F2) ----
+  // Locked pictures: ☕, 🥨, 🍞. Reward words always Ich / dich / mag.
+  var questions = [
+    { emoji: "☕", answer: "Kaffee", options: ["Kaffee", "Brot", "Milch"] },
+    { emoji: "🥨", answer: "Brezel", options: ["Kuchen", "Brezel", "Salz"] },
+    { emoji: "🍞", answer: "Brot", options: ["Käse", "Zucker", "Brot"] }
+  ];
+  var rewardWords = ["Ich", "dich", "mag"];
+  var qIndex = 0;
+  var rewards = [];
+
+  var quizPrompt = document.getElementById("q-prompt");
+  var quizFeedback = document.getElementById("q-feedback");
+  var quizButtons = document.querySelectorAll("#s-quiz button.opt");
+  var rewardsBox = document.getElementById("rewards");
+  var revealWords = document.getElementById("reveal-words");
+  var magicBlock = document.getElementById("magic-block");
+  var confettiWrap = document.getElementById("confetti-wrap");
+
+  // ---- navigation ----
+  function show(id) {
+    Object.keys(screens).forEach(function (k) { screens[k].classList.remove("active"); });
+    screens[id].classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  // ---- landing (F1) ----
+  document.getElementById("btn-start").addEventListener("click", function () {
+    show("quiz");
+    loadQuestion(0);
+  });
+
+  // ---- quiz (F2/F3) ----
+  function loadQuestion(i) {
+    qIndex = i;
+    var q = questions[i];
+    quizPrompt.textContent = q.emoji;
+    quizFeedback.textContent = "";
+    quizFeedback.className = "feedback";
+    var shuffled = shuffle(q.options.slice());
+    shuffled.forEach(function (word, idx) {
+      var b = quizButtons[idx];
+      b.textContent = word;
+      b.dataset.correct = word === q.answer ? "1" : "0";
+      b.classList.remove("wrong");
+      b.disabled = false;
+    });
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  Array.prototype.forEach.call(quizButtons, function (b) {
+    b.addEventListener("click", function () {
+      if (b.dataset.correct === "1") {
+        // collect reward word (F3)
+        rewards.push(rewardWords[qIndex]);
+        addReward(rewardWords[qIndex]);
+        if (qIndex < questions.length - 1) {
+          loadQuestion(qIndex + 1);
+        } else {
+          show("reveal");
+          startReveal();
+        }
+      } else {
+        // wrong: gentle feedback, stay on same question (F2)
+        b.classList.remove("wrong");
+        void b.offsetWidth; // restart shake animation
+        b.classList.add("wrong");
+        quizFeedback.textContent = "Fast! Versuch es nochmal!";
+        quizFeedback.className = "feedback try";
+      }
+    });
+  });
+
+  function addReward(word) {
+    var empty = rewardsBox.querySelector(".reward-empty");
+    if (empty) empty.remove();
+    var span = document.createElement("span");
+    span.className = "reward-word";
+    span.textContent = word;
+    rewardsBox.appendChild(span);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { span.classList.add("earned"); }); });
+  }
+
+  // ---- reveal (F4) ----
+  function startReveal() {
+    confettiWrap.innerHTML = "";
+    fireConfetti();
+    document.getElementById("reveal-title").textContent = "Gut gemacht! 🎉";
+    document.getElementById("reveal-sub").textContent = "Deine drei Wörter…";
+    revealWords.innerHTML = "";
+    magicBlock.style.display = "none";
+    revealWords.style.display = "flex";
+
+    // Show collected words one at a time
+    rewards.forEach(function (w, i) {
+      setTimeout(function () {
+        var span = document.createElement("span");
+        span.className = "reward-word";
+        span.textContent = w;
+        revealWords.appendChild(span);
+        requestAnimationFrame(function () { requestAnimationFrame(function () { span.classList.add("earned"); }); });
+      }, 350 * i);
+    });
+
+    // Rearrange into "Ich mag dich ❤️"
+    setTimeout(function () {
+      revealWords.style.display = "none";
+      magicBlock.style.display = "block";
+      fireConfetti();
+    }, 350 * rewards.length + 600);
+
+    // Auto-transition to ask (F4.3)
+    setTimeout(function () { show("ask"); }, 350 * rewards.length + 2600);
+  }
+
+  function fireConfetti() {
+    var colors = ["#ff8fab", "#ffd6e0", "#cfe8ff", "#fff3c4", "#62c77f", "#b39dff"];
+    for (var i = 0; i < 26; i++) {
+      var c = document.createElement("span");
+      c.className = "confetti";
+      c.style.left = (Math.random() * 100) + "%";
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDelay = (Math.random() * 0.4) + "s";
+      confettiWrap.appendChild(c);
+    }
+  }
+
+  // ---- ask (F5) ----
+  document.getElementById("btn-yes").addEventListener("click", function () {
+    show("yes");
+    resetPicker();
+  });
+  document.getElementById("btn-no").addEventListener("click", function () {
+    show("no");
+  });
+
+  // ---- yes (F6) ----
+  var chosenDay = null, chosenTime = null;
+  var dayChips = document.querySelectorAll("#s-yes .chip[data-day]");
+  var timeChips = document.querySelectorAll("#s-yes .chip[data-time]");
+  var yesConfirm = document.getElementById("yes-confirm");
+
+  function resetPicker() {
+    chosenDay = null; chosenTime = null;
+    yesConfirm.textContent = "";
+    Array.prototype.forEach.call(dayChips, function (c) { c.classList.remove("selected"); });
+    Array.prototype.forEach.call(timeChips, function (c) { c.classList.remove("selected"); });
+  }
+
+  Array.prototype.forEach.call(dayChips, function (c) {
+    c.addEventListener("click", function () {
+      Array.prototype.forEach.call(dayChips, function (x) { x.classList.remove("selected"); });
+      c.classList.add("selected");
+      chosenDay = c.dataset.day;
+      maybeConfirm();
+    });
+  });
+  Array.prototype.forEach.call(timeChips, function (c) {
+    c.addEventListener("click", function () {
+      Array.prototype.forEach.call(timeChips, function (x) { x.classList.remove("selected"); });
+      c.classList.add("selected");
+      chosenTime = c.dataset.time;
+      maybeConfirm();
+    });
+  });
+
+  function maybeConfirm() {
+    if (chosenDay && chosenTime) {
+      yesConfirm.textContent = chosenDay + ", " + chosenTime + " Uhr — Bis dann! 😊";
+    }
+  }
+
+  // ---- no (F7) ----
+  // All content is static; farewell fades in via CSS animation delay.
+})();
+</script>
+</body>
+</html>

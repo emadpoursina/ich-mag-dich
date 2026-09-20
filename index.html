@@ -29,7 +29,7 @@
     align-items: center;
     justify-content: center;
     min-height: 100dvh;
-    padding: 16px;
+    padding: 16px 16px calc(40px + env(safe-area-inset-bottom));
   }
   .screen {
     width: 100%;
@@ -127,6 +127,22 @@
   .farewell { margin-top: 18px; color: var(--muted); font-size: 17px; font-weight: 600; opacity: 0; animation: fadeIn 0.8s ease 1.6s forwards; }
   @keyframes fadeIn { to { opacity: 1; } }
   .sad { color: #6d6a70; }
+
+  /* closing credit: small, quiet, present on every screen */
+  .credit {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    color: var(--muted);
+    pointer-events: none;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
@@ -204,6 +220,9 @@
   <div class="dance-emoji">🕺</div>
   <div class="farewell">Tschüss! Bis morgen in der Klasse!</div>
 </section>
+
+<!-- ===== CLOSING CREDIT (visible on every screen) ===== -->
+<footer class="credit">Gebaut mit ❤️ — für dich</footer>
 
 <script>
 (function () {
